@@ -17,7 +17,7 @@ describe("Manager", function () {
         it("Should create a new character", async function () {
             const {manager} = await loadFixture(deployManagerFixture);
 
-            const tx = await manager.crateCharacter("Hero");
+            const tx = await manager.createCharacter("Hero");
             await tx.wait();
             const characterAddress = await manager.characters("Hero");
 
@@ -29,7 +29,7 @@ describe("Manager", function () {
         it("Should return character data for a valid character", async function () {
             const {manager} = await loadFixture(deployManagerFixture);
 
-            await manager.crateCharacter("Hero");
+            await manager.createCharacter("Hero");
             const characterData = await manager.getCharacterData("Hero");
 
             expect(characterData[1]).to.equal(100); // Health should be 100
