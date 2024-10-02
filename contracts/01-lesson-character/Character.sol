@@ -1,50 +1,56 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+
+pragma solidity ^0.8.26;
 
 contract Character {
+    string username;
+    address owner;
+    uint health;
 
-    address public owner;
+    constructor(string memory nameIn, address _owner) payable {
+        owner = payable(_owner);
+        username = nameIn;
+        characterData.username = nameIn;
+        characterData.health = 100;
+        // lastPaymentDate = block.timestamp;
+        // lastPaymentAmount = (msg.value);
+    }
 
-    constructor (string memory name, address _owner) {
-        owner = _owner;
-        characters.push(CharacterData(0, 100, 0, 0, name));
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not Owner");
+        _;
     }
 
     struct CharacterData {
         uint balance;
         uint health;
-        uint lastPaymentDate;
-        uint lastPaymentAmount;
         string username;
+        uint lastPaymentAmount;
+        uint lastPaymentDate;
     }
 
-    CharacterData[] public characters;
+    CharacterData characterData;
 
-    modifier OnlyOwner() {
-        require(owner == msg.sender, "Not Owner");
-        _;
+    function deposit() public payable returns (uint) {
+        require(msg.value > 0.01 ether, "error deposit");
+        characterData.balance += msg.value;
+        characterData.lastPaymentAmount = msg.value;
+        characterData.lastPaymentDate = block.timestamp;
+        return msg.value;
     }
 
-    function deposit() payable public {
-        require(msg.value > 0.01 ether, 'error deposit');
-        CharacterData storage character = characters[0];
-        character.balance = msg.value;
-        character.lastPaymentDate = block.timestamp;
+    address to = 0x0000000000000000000000000000000000000000;
+
+    function increaseHealth(uint heal) public payable onlyOwner returns (uint256) {
+        require(characterData.balance >= 0.001 ether, "error health");
+        characterData.balance -= 0.001 ether;
+        (bool sent, ) = to.call{value: 0.001 ether}("");
+        require(sent, "ETH burn failed");
+        characterData.health += heal;
+        return characterData.health;
     }
 
-    function increaseHealth(uint heal) public OnlyOwner returns(uint)  {
-        CharacterData storage character = characters[0];
-        require(character.balance > 0.001 ether, "error health");
-        uint cost = heal * 0.001 ether;
-        character.balance -= cost;
-        (bool succses, ) = address(0x0000000000000000000000000000000000000000).call{value: cost}("");
-        require(succses, "ETH burn failed");
-        character.health += heal;
-        return character.health;
+    function getCharacterData() public view returns(uint, uint, uint, uint, string memory) {
+        return (characterData.balance, characterData.health, characterData.lastPaymentAmount, characterData.lastPaymentDate, characterData.username);
     }
-
-    function getCharacterData() public view returns (uint, uint, uint, uint, string memory) {
-        return (characters[0].balance, characters[0].health, characters[0].lastPaymentDate, characters[0].lastPaymentAmount, characters[0].username);
-    }
-
 }
