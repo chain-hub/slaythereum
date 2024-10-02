@@ -1,24 +1,18 @@
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
-
-import "./Character.sol";
-
-contract Manager {
-
+contract CharacterManager{
+    Character[] public characterCreate;
     mapping(string => address) public characters;
 
-    function crateCharacter(string memory _username) public returns(address)  {
-        require(characters[_username] == address(0));
-        Character newCharacter = new Character(_username, msg.sender);
-        characters[_username] = address(newCharacter);
-        return address(newCharacter);
-    }
+    function createCharacter(string memory NewCharacter) public returns(address){ 
+        Character newCharacter = new Character(NewCharacter); 
+        characters[NewCharacter] = address(newCharacter); 
+        characterCreate.push(newCharacter); 
+        require(msg.sender != address(0), "Error");
+        return address(newCharacter); 
+    } 
 
-    function getCharacterData(string memory _username) public view returns(uint, uint, uint, uint, string memory) {
-        address characterAddress = characters[_username];
-        require(characterAddress != address(0));
-        Character character = Character(characterAddress);
-        (uint balance, uint health, uint lastPaymentDate, uint lastPaymentAmount, string memory username) = character.getCharacterData();
-        return (balance, health, lastPaymentDate, lastPaymentAmount, username);
-    }
+    function getCharacterData(string memory _name) public view returns(uint256 balance, uint256 health, uint256 lastPaymentDate, uint256 lastPaymentAmount){  
+       Character character = Character(characters[_name]);  
+       (balance, health, lastPaymentDate, lastPaymentAmount) = character.characterdata();
+       return (balance, health, lastPaymentDate, lastPaymentAmount);  
+   } 
 }
