@@ -14,18 +14,18 @@ contract Character {
     CharacterData public characterData;
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
+        require(msg.sender == owner, "Not Owner");
         _;
     }
 
-    constructor(string memory username) {
-        owner = msg.sender;
+    constructor(string memory username, address _owner) {
+        owner = _owner;
         characterData.username = username;
-        characterData.health = 100; // Начальное здоровье
+        characterData.health = 100;
     }
 
     function deposit() external payable returns (uint256) {
-        require(msg.value >= 0.01 ether, "Minimum deposit is 0.01 ETH");
+        require(msg.value >= 0.01 ether, "error deposit");
         
         characterData.balance += msg.value;
         characterData.lastPaymentDate = block.timestamp;
@@ -36,7 +36,7 @@ contract Character {
 
     function increaseHealth(uint256 amount) external onlyOwner returns (uint256) {
         uint256 cost = amount * 0.001 ether;
-        require(characterData.balance >= cost, "Insufficient balance");
+        require(characterData.balance >= cost, "error health");
 
         characterData.balance -= cost;
         characterData.health += amount;
@@ -44,12 +44,13 @@ contract Character {
         return characterData.health;
     }
 
-    function getCharacterData() external view returns (uint256, uint256, uint256, uint256) {
+    function getCharacterData() external view returns (uint256, uint256, uint256, uint256, string memory) {
         return (
             characterData.balance,
             characterData.health,
             characterData.lastPaymentDate,
-            characterData.lastPaymentAmount
+            characterData.lastPaymentAmount,
+            characterData.username
         );
     }
 }
